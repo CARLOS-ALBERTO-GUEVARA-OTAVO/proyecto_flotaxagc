@@ -64,116 +64,217 @@ try {
     <!-- Eliminar la línea 64 que incluye Chart.js CSS -->
     <!-- <link href="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.css" rel="stylesheet"> -->
     <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --success-color: #27ae60;
-            --warning-color: #f39c12;
-            --danger-color: #e74c3c;
-            --dark-color: #34495e;
-            --light-color: #ecf0f1;
-        }
-        
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
+    :root {
+        --primary-color: #1a3c34; /* Deep teal for a professional look */
+        --secondary-color: #00a896; /* Vibrant teal accent */
+        --accent-color: #f4a261; /* Warm orange for highlights */
+        --background-color: #f0f4f8; /* Light, clean background */
+        --card-background: #ffffff; /* White for cards */
+        --text-color: #2d3436; /* Dark gray for text */
+        --muted-text: #636e72; /* Muted gray for secondary text */
+        --danger-color: #d63031; /* Red for danger/logout */
+    }
+
+    body {
+        background-color: var(--background-color);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        color: var(--text-color);
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .sidebar {
+        background: linear-gradient(180deg, var(--primary-color), #0d2a25);
+        min-height: 100vh;
+        padding-top: 20px;
+        transition: all 0.3s ease;
+        position: sticky;
+        top: 0;
+    }
+
+    .sidebar .nav-link {
+        color: #dfe6e9;
+        padding: 12px 15px;
+        margin: 8px 10px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .sidebar .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+        transform: translateX(4px);
+    }
+
+    .sidebar .nav-link.active {
+        background-color: var(--secondary-color);
+        color: #ffffff;
+        box-shadow: 0 2px 8px rgba(0, 168, 150, 0.3);
+    }
+
+    .sidebar .nav-link i {
+        margin-right: 10px;
+        font-size: 1.2rem;
+    }
+
+    .main-content {
+        padding: 30px;
+    }
+
+    .stat-card {
+        background: var(--card-background);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        border-left: 5px solid var(--secondary-color);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card.primary { border-left-color: var(--primary-color); }
+    .stat-card.success { border-left-color: var(--secondary-color); }
+    .stat-card.warning { border-left-color: var(--accent-color); }
+    .stat-card.danger { border-left-color: var(--danger-color); }
+
+    .stat-icon {
+        font-size: 2.2rem;
+        opacity: 0.9;
+        color: var(--secondary-color);
+    }
+
+    .stat-card h3 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+        color: var(--text-color);
+    }
+
+    .stat-card p {
+        font-size: 0.9rem;
+        color: var(--muted-text);
+        margin: 0;
+    }
+
+    .table-container {
+        background: var(--card-background);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        margin-top: 30px;
+    }
+
+    .table-container h5 {
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: 20px;
+    }
+
+    .table th {
+        font-weight: 600;
+        color: var(--text-color);
+        background-color: #f8f9fa;
+    }
+
+    .table td {
+        vertical-align: middle;
+        color: var(--text-color);
+    }
+
+    .table .badge {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+        border-radius: 20px;
+    }
+
+    .navbar-brand {
+        font-weight: 700;
+        color: var(--primary-color) !important;
+        font-size: 1.4rem;
+    }
+
+    .user-info {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 20px;
+        margin: 20px 15px;
+        text-align: center;
+        color: #ffffff;
+    }
+
+    .user-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: var(--secondary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 12px;
+        font-size: 1.8rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .user-info h6 {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .user-info small {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .dropdown-menu {
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border: none;
+    }
+
+    .dropdown-item {
+        padding: 10px 20px;
+        font-weight: 500;
+        color: var(--text-color);
+    }
+
+    .dropdown-item:hover {
+        background-color: var(--background-color);
+        color: var(--primary-color);
+    }
+
+    .dropdown-item.text-danger {
+        color: var(--danger-color) !important;
+    }
+
+    hr.text-white-50 {
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    @media (max-width: 768px) {
         .sidebar {
-            background: linear-gradient(135deg, var(--primary-color), var(--dark-color));
-            min-height: 100vh;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 250px;
+            z-index: 1000;
         }
-        
-        .sidebar .nav-link {
-            color: rgba(255,255,255,0.8);
-            padding: 12px 20px;
-            margin: 5px 10px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-        
-        .sidebar .nav-link:hover {
-            background-color: rgba(255,255,255,0.1);
-            color: white;
-            transform: translateX(5px);
-        }
-        
-        .sidebar .nav-link.active {
-            background-color: var(--secondary-color);
-            color: white;
-        }
-        
         .main-content {
             padding: 20px;
         }
-        
         .stat-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border-left: 4px solid;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        }
-        
-        .stat-card.primary { border-left-color: var(--primary-color); }
-        .stat-card.success { border-left-color: var(--success-color); }
-        .stat-card.warning { border-left-color: var(--warning-color); }
-        .stat-card.danger { border-left-color: var(--danger-color); }
-        
-        .stat-icon {
-            font-size: 2.5rem;
-            opacity: 0.8;
-        }
-        
-        .chart-container {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            margin-top: 20px;
-        }
-        
-        .table-container {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            margin-top: 20px;
-        }
-        
-        .navbar-brand {
-            font-weight: bold;
-            color: var(--primary-color) !important;
-        }
-        
-        .user-info {
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
             padding: 15px;
-            margin: 20px 10px;
-            text-align: center;
         }
-        
-        .user-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: var(--secondary-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 10px;
-            font-size: 1.5rem;
-            color: white;
+        .stat-icon {
+            font-size: 2rem;
         }
-    </style>
+    }
+</style>
 </head>
 <body>
     <div class="container-fluid">
