@@ -553,7 +553,7 @@ try {
     $stmt = $con->query("SELECT COUNT(*) as total FROM vehiculos");
     $total_vehiculos = $stmt->fetch()['total'];
     
-    $stmt = $con->query("SELECT COUNT(*) as total FROM vehiculos WHERE id_estado = '1'");
+    $stmt = $con->query("SELECT COUNT(*) as total FROM vehiculos WHERE id_estado = '10'");
     $vehiculos_activos = $stmt->fetch()['total'];
     
     // Estadísticas de documentación próxima a vencer

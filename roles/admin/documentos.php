@@ -8,8 +8,6 @@ $con = $db->conectar();
 $code = $_SESSION['documento'];
 
 // Consulta mejorada para obtener documentos
-
-
 $documento = $_SESSION['documento'] ?? null;
 if (!$documento) {
     header('Location: ../../login.php');
@@ -33,7 +31,7 @@ if (!$nombre_completo || !$foto_perfil) {
 function getDocumentStatus($fecha_vencimiento) {
     if (!$fecha_vencimiento) return 'no-disponible';
     
-    $fecha_actual = new DateTime();
+    $fecha_actual = new DateTime('now', new DateTimeZone('America/Bogota')); // Ajuste a zona horaria -05
     $fecha_venc = new DateTime($fecha_vencimiento);
     $diferencia = $fecha_actual->diff($fecha_venc);
     
@@ -52,9 +50,14 @@ $documentos = [];
 $query = $con->prepare("
     SELECT 
         v.placa,
+        s.fecha_expedicion AS soat_expedicion,
         s.fecha_vencimiento AS soat_vence,
+        t.fecha_expedicion AS tecnomecanica_expedicion,
         t.fecha_vencimiento AS tecnomecanica_vence,
+        l.fecha_expedicion AS licencia_expedicion,
         l.fecha_vencimiento AS licencia_vence,
+        u.email,
+        u.telefono,
         u.nombre_completo AS propietario
     FROM vehiculos v
     LEFT JOIN soat s ON v.placa = s.id_placa
@@ -68,606 +71,619 @@ $resultados = $query->fetchAll(PDO::FETCH_ASSOC);
 
 foreach ($resultados as $row) {
     $estado_licencia = getDocumentStatus($row['licencia_vence']);
+    $estado_soat = getDocumentStatus($row['soat_vence']);
+    $estado_tecnomecanica = getDocumentStatus($row['tecnomecanica_vence']);
 
     $documentos[] = [
         'placa' => $row['placa'],
-        'soat_vence' => $row['soat_vence'],
-        'tecnomecanica_vence' => $row['tecnomecanica_vence'],
-        'licencia_estado' => $estado_licencia,
+        'soat' => [
+            'expedicion' => $row['soat_expedicion'],
+            'vencimiento' => $row['soat_vence'],
+            'estado' => $estado_soat
+        ],
+        'tecnomecanica' => [
+            'expedicion' => $row['tecnomecanica_expedicion'],
+            'vencimiento' => $row['tecnomecanica_vence'],
+            'estado' => $estado_tecnomecanica
+        ],
+        'licencia' => [
+            'expedicion' => $row['licencia_expedicion'],
+            'vencimiento' => $row['licencia_vence'],
+            'estado' => $estado_licencia
+        ],
+        'email' => $row['email'],
+        'telefono' => $row['telefono'],
         'propietario' => $row['propietario'] ?? 'Desconocido'
     ];
 }
 ?>
- 
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Visualizacion de Documentos - Flotax AGC</title>
+  <title>Visualización de Documentos - Flotax AGC</title>
   <link rel="shortcut icon" href="../../css/img/logo_sinfondo.png">
   <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* Estilos para el Control de Documentos */
-:root {
-  --primary-color: #667eea;
-  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --secondary-color: #2c3e50;
-  --success-color: #27ae60;
-  --warning-color: #f39c12;
-  --danger-color: #e74c3c;
-  --info-color: #3498db;
-  --text-color: #2d3748;
-  --text-light: #718096;
-  --bg-color: #f8fafc;
-  --card-bg: #ffffff;
-  --border-color: #e2e8f0;
-  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --sidebar-width: 80px;
-  --sidebar-expanded-width: 280px;
-  --border-radius: 12px;
-}
+  /* Estilos para el Control de Documentos */
+  :root {
+    --primary-color: #667eea;
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --secondary-color: #2c3e50;
+    --success-color: #27ae60;
+    --warning-color: #f39c12;
+    --danger-color: #e74c3c;
+    --info-color: #3498db;
+    --text-color: #2d3748;
+    --text-light: #718096;
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --border-color: #e2e8f0;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --sidebar-width: 80px;
+    --sidebar-expanded-width: 280px;
+    --border-radius: 12px;
+  }
 
-body {
-  font-family: "Poppins", sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  overflow-x: hidden;
-}
+  body {
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    overflow-x: hidden;
+  }
 
-/* Contenido principal */
-.content {
-  margin-left: calc(var(--sidebar-width) + 20px);
-  padding: 30px;
-  transition: var(--transition);
-  min-height: 100vh;
-}
-
-.sidebar.expanded ~ .content {
-  margin-left: calc(var(--sidebar-expanded-width) + 20px);
-}
-
-.container-fluid {
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-/* Header de la página */
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-  padding: 20px 0;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.page-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--secondary-color);
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.page-title i {
-  color: var(--primary-color);
-  font-size: 32px;
-}
-
-.page-subtitle {
-  color: var(--text-light);
-  font-size: 16px;
-  margin-top: 5px;
-}
-
-/* Controles superiores */
-.controls-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-/* Buscador mejorado */
-.buscador {
-  position: relative;
-  flex: 1;
-  max-width: 400px;
-}
-
-.buscador input {
-  width: 100%;
-  padding: 12px 20px 12px 45px;
-  border: 2px solid var(--border-color);
-  border-radius: 25px;
-  font-size: 14px;
-  transition: var(--transition);
-  background-color: var(--card-bg);
-  box-shadow: var(--shadow);
-}
-
-.buscador input:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.buscador::before {
-  content: "\F52A";
-  font-family: "Bootstrap Icons";
-  position: absolute;
-  left: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-light);
-  font-size: 16px;
-  z-index: 2;
-}
-
-/* Botón agregar */
-.boton-agregar .btn {
-  background: var(--primary-gradient);
-  border: none;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 14px;
-  transition: var(--transition);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  box-shadow: var(--shadow);
-}
-
-.boton-agregar .btn:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-}
-
-.boton-agregar .btn i {
-  font-size: 16px;
-}
-
-/* Contenedor de tabla */
-.table-container {
-  background: var(--card-bg);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-  margin-bottom: 25px;
-  animation: fadeInUp 0.6s ease-out;
-}
-
-.table-responsive {
-  border-radius: var(--border-radius);
-  overflow: hidden;
-}
-
-/* Tabla mejorada */
-.table {
-  margin: 0;
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
-.table thead {
-  background: var(--primary-gradient);
-  color: white;
-}
-
-.table thead th {
-  padding: 18px 15px;
-  font-weight: 600;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border: none;
-  white-space: nowrap;
-  position: relative;
-}
-
-.table thead th:first-child {
-  border-top-left-radius: var(--border-radius);
-}
-
-.table thead th:last-child {
-  border-top-right-radius: var(--border-radius);
-}
-
-.table tbody tr {
-  transition: var(--transition);
-  border-bottom: 1px solid var(--border-color);
-}
-
-.table tbody tr:hover {
-  background-color: rgba(102, 126, 234, 0.05);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.table tbody tr:last-child {
-  border-bottom: none;
-}
-
-.table tbody td {
-  padding: 16px 15px;
-  vertical-align: middle;
-  border: none;
-  font-size: 14px;
-}
-
-/* Placa destacada */
-.placa-badge {
-  background: linear-gradient(135deg, var(--secondary-color), #34495e);
-  color: white;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  font-size: 13px;
-  display: inline-block;
-}
-
-/* Estados de documentos */
-.status-vigente {
-  color: var(--success-color);
-  font-weight: 600;
-  padding: 6px 12px;
-  background-color: rgba(39, 174, 96, 0.1);
-  border-radius: 20px;
-  font-size: 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.status-vigente::before {
-  content: "\F26A";
-  font-family: "Bootstrap Icons";
-  font-size: 14px;
-}
-
-.status-vencido {
-  color: var(--danger-color);
-  font-weight: 600;
-  padding: 6px 12px;
-  background-color: rgba(231, 76, 60, 0.1);
-  border-radius: 20px;
-  font-size: 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.status-vencido::before {
-  content: "\F623";
-  font-family: "Bootstrap Icons";
-  font-size: 14px;
-}
-
-.status-proximo {
-  color: var(--warning-color);
-  font-weight: 600;
-  padding: 6px 12px;
-  background-color: rgba(243, 156, 18, 0.1);
-  border-radius: 20px;
-  font-size: 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.status-proximo::before {
-  content: "\F4A2";
-  font-family: "Bootstrap Icons";
-  font-size: 14px;
-}
-
-/* Enlaces de documentos */
-.documento-link {
-  color: var(--info-color);
-  text-decoration: none;
-  font-weight: 600;
-  padding: 6px 12px;
-  background-color: rgba(52, 152, 219, 0.1);
-  border-radius: 6px;
-  transition: var(--transition);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-}
-
-.documento-link:hover {
-  background-color: rgba(52, 152, 219, 0.2);
-  transform: translateY(-1px);
-}
-
-.documento-link::before {
-  content: "\F1C1";
-  font-family: "Bootstrap Icons";
-  font-size: 14px;
-}
-
-/* Acciones */
-.action-buttons {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-}
-
-.action-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  transition: var(--transition);
-  cursor: pointer;
-  border: 1px solid transparent;
-}
-
-.action-icon.edit {
-  color: var(--info-color);
-  background-color: rgba(52, 152, 219, 0.1);
-  border-color: rgba(52, 152, 219, 0.2);
-}
-
-.action-icon.edit:hover {
-  background-color: var(--info-color);
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
-}
-
-.action-icon.delete {
-  color: var(--danger-color);
-  background-color: rgba(231, 76, 60, 0.1);
-  border-color: rgba(231, 76, 60, 0.2);
-}
-
-.action-icon.delete:hover {
-  background-color: var(--danger-color);
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
-}
-
-/* Paginación mejorada */
-.pagination-container {
-  display: flex;
-  justify-content: center;
-  margin-top: 25px;
-}
-
-.pagination {
-  display: flex;
-  gap: 5px;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.page-item {
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.page-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background-color: var(--card-bg);
-  color: var(--text-color);
-  text-decoration: none;
-  border: 1px solid var(--border-color);
-  font-weight: 600;
-  font-size: 14px;
-  transition: var(--transition);
-}
-
-.page-link:hover {
-  background-color: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
-  transform: translateY(-1px);
-}
-
-.page-item.active .page-link {
-  background: var(--primary-gradient);
-  color: white;
-  border-color: var(--primary-color);
-  box-shadow: var(--shadow);
-}
-
-/* Estadísticas rápidas */
-.stats-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
-.stat-card {
-  background: var(--card-bg);
-  border-radius: var(--border-radius);
-  padding: 20px;
-  box-shadow: var(--shadow);
-  transition: var(--transition);
-  position: relative;
-  overflow: hidden;
-}
-
-.stat-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-lg);
-}
-
-.stat-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background: var(--primary-gradient);
-}
-
-.stat-card.success::before {
-  background: linear-gradient(135deg, var(--success-color), #2ecc71);
-}
-
-.stat-card.warning::before {
-  background: linear-gradient(135deg, var(--warning-color), #e67e22);
-}
-
-.stat-card.danger::before {
-  background: linear-gradient(135deg, var(--danger-color), #c0392b);
-}
-
-.stat-number {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--secondary-color);
-  margin: 0;
-}
-
-.stat-label {
-  font-size: 13px;
-  color: var(--text-light);
-  margin-top: 5px;
-  font-weight: 500;
-}
-
-.stat-icon {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  font-size: 24px;
-  opacity: 0.3;
-  color: var(--primary-color);
-}
-
-/* Responsive Design */
-@media (max-width: 1200px) {
+  /* Contenido principal */
   .content {
-    margin-left: 20px;
-    padding: 20px;
+    margin-left: calc(var(--sidebar-width) + 20px);
+    padding: 30px;
+    transition: var(--transition);
+    min-height: 100vh;
   }
 
   .sidebar.expanded ~ .content {
-    margin-left: 20px;
+    margin-left: calc(var(--sidebar-expanded-width) + 20px);
   }
-}
 
-@media (max-width: 768px) {
-  .content {
-    margin-left: 0;
-    padding: 15px;
+  .container-fluid {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Header de la página */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border-color);
   }
 
   .page-title {
-    font-size: 24px;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--secondary-color);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
 
+  .page-title i {
+    color: var(--primary-color);
+    font-size: 32px;
+  }
+
+  .page-subtitle {
+    color: var(--text-light);
+    font-size: 16px;
+    margin-top: 5px;
+  }
+
+  /* Controles superiores */
   .controls-section {
-    flex-direction: column;
-    align-items: stretch;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    gap: 20px;
+    flex-wrap: wrap;
   }
 
+  /* Buscador mejorado */
   .buscador {
-    max-width: none;
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+  }
+
+  .buscador input {
+    width: 100%;
+    padding: 12px 20px 12px 45px;
+    border: 2px solid var(--border-color);
+    border-radius: 25px;
+    font-size: 14px;
+    transition: var(--transition);
+    background-color: var(--card-bg);
+    box-shadow: var(--shadow);
+  }
+
+  .buscador input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  .buscador::before {
+    content: "\F52A";
+    font-family: "Bootstrap Icons";
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+    font-size: 16px;
+    z-index: 2;
+  }
+
+  /* Botón agregar */
+  .boton-agregar .btn {
+    background: var(--primary-gradient);
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: var(--shadow);
+  }
+
+  .boton-agregar .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .boton-agregar .btn i {
+    font-size: 16px;
+  }
+
+  /* Contenedor de tabla */
+  .table-container {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 25px;
+    animation: fadeInUp 0.6s ease-out;
   }
 
   .table-responsive {
-    font-size: 12px;
+    border-radius: var(--border-radius);
+    overflow: hidden;
   }
 
-  .table thead th,
+  /* Tabla mejorada */
+  .table {
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .table thead {
+    background: var(--primary-gradient);
+    color: white;
+  }
+
+  .table thead th {
+    padding: 18px 15px;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: none;
+    white-space: nowrap;
+    position: relative;
+  }
+
+  .table thead th:first-child {
+    border-top-left-radius: var(--border-radius);
+  }
+
+  .table thead th:last-child {
+    border-top-right-radius: var(--border-radius);
+  }
+
+  .table tbody tr {
+    transition: var(--transition);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .table tbody tr:hover {
+    background-color: rgba(102, 126, 234, 0.05);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .table tbody tr:last-child {
+    border-bottom: none;
+  }
+
   .table tbody td {
-    padding: 10px 8px;
+    padding: 16px 15px;
+    vertical-align: middle;
+    border: none;
+    font-size: 14px;
+    text-align: center;
   }
 
-  .stats-cards {
-    grid-template-columns: 1fr;
+  /* Placa destacada */
+  .placa-badge {
+    background: linear-gradient(135deg, var(--secondary-color), #34495e);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    font-size: 13px;
+    display: inline-block;
   }
 
-  .action-buttons {
+  /* Document info card */
+  .doc-info {
+    display: flex;
     flex-direction: column;
     gap: 5px;
+    text-align: left;
+  }
+
+  .doc-date {
+    font-size: 14px;
+    color: var(--text-color);
+  }
+
+  .doc-status {
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+  }
+
+  .doc-status.vigente {
+    background-color: rgba(39, 174, 96, 0.1);
+    color: var(--success-color);
+  }
+
+  .doc-status.proximo {
+    background-color: rgba(243, 156, 18, 0.1);
+    color: var(--warning-color);
+  }
+
+  .doc-status.vencido {
+    background-color: rgba(231, 76, 60, 0.1);
+    color: var(--danger-color);
+  }
+
+  .doc-status.no-disponible {
+    background-color: rgba(173, 216, 230, 0.1); /* Azul grisáceo claro */
+    color: #4682b4; /* Azul acero */
+  }
+
+  /* Información del usuario */
+  .user-info {
+    font-size: 14px;
+    color: var(--text-color);
+    font-weight: 500;
+  }
+
+  /* Tooltip styles */
+  .fecha-tooltip {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .fecha-tooltip:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--secondary-color);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 1001;
+    margin-bottom: 5px;
+  }
+
+  .fecha-tooltip:hover::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% - 5px);
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--secondary-color);
+    z-index: 1001;
+  }
+
+  /* Acciones */
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
   }
 
   .action-icon {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: var(--transition);
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+
+  .action-icon.edit {
+    color: var(--info-color);
+    background-color: rgba(52, 152, 219, 0.1);
+    border-color: rgba(52, 152, 219, 0.2);
+  }
+
+  .action-icon.edit:hover {
+    background-color: var(--info-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+  }
+
+  .action-icon.delete {
+    color: var(--danger-color);
+    background-color: rgba(231, 76, 60, 0.1);
+    border-color: rgba(231, 76, 60, 0.2);
+  }
+
+  .action-icon.delete:hover {
+    background-color: var(--danger-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+  }
+
+  /* Paginación mejorada */
+  .pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 25px;
+  }
+
+  .pagination {
+    display: flex;
+    gap: 5px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .page-item {
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    text-decoration: none;
+    border: 1px solid var(--border-color);
+    font-weight: 600;
     font-size: 14px;
+    transition: var(--transition);
   }
-}
 
-/* Animaciones */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
+  .page-link:hover {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    transform: translateY(-1px);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  .page-item.active .page-link {
+    background: var(--primary-gradient);
+    color: white;
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow);
   }
-}
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
+  /* Estadísticas rápidas */
+  .stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
   }
-  to {
-    opacity: 1;
-    transform: translateX(0);
+
+  .stat-card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
   }
-}
 
-.table tbody tr {
-  animation: slideIn 0.3s ease-out;
-}
+  .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+  }
 
-.table tbody tr:nth-child(1) {
-  animation-delay: 0.1s;
-}
-.table tbody tr:nth-child(2) {
-  animation-delay: 0.2s;
-}
-.table tbody tr:nth-child(3) {
-  animation-delay: 0.3s;
-}
-.table tbody tr:nth-child(4) {
-  animation-delay: 0.4s;
-}
-.table tbody tr:nth-child(5) {
-  animation-delay: 0.5s;
-}
+  .stat-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--primary-gradient);
+  }
 
+  .stat-card.success::before {
+    background: linear-gradient(135deg, var(--success-color), #2ecc71);
+  }
+
+  .stat-card.warning::before {
+    background: linear-gradient(135deg, var(--warning-color), #e67e22);
+  }
+
+  .stat-card.danger::before {
+    background: linear-gradient(135deg, var(--danger-color), #c0392b);
+  }
+
+  .stat-number {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--secondary-color);
+    margin: 0;
+  }
+
+  .stat-label {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-top: 5px;
+    font-weight: 500;
+  }
+
+  .stat-icon {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 24px;
+    opacity: 0.3;
+    color: var(--primary-color);
+  }
+
+  /* Responsive Design */
+  @media (max-width: 1200px) {
+    .content {
+      margin-left: 20px;
+      padding: 20px;
+    }
+
+    .sidebar.expanded ~ .content {
+      margin-left: 20px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .content {
+      margin-left: 0;
+      padding: 15px;
+    }
+
+    .page-title {
+      font-size: 24px;
+    }
+
+    .controls-section {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .buscador {
+      max-width: none;
+    }
+
+    .table-responsive {
+      font-size: 12px;
+    }
+
+    .table thead th,
+    .table tbody td {
+      padding: 10px 8px;
+    }
+
+    .stats-cards {
+      grid-template-columns: 1fr;
+    }
+
+    .action-buttons {
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .action-icon {
+      width: 32px;
+      height: 32px;
+      font-size: 14px;
+    }
+  }
+
+  /* Animaciones */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .table tbody tr {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  .table tbody tr:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+  .table tbody tr:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  .table tbody tr:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+  .table tbody tr:nth-child(4) {
+    animation-delay: 0.4s;
+  }
+  .table tbody tr:nth-child(5) {
+    animation-delay: 0.5s;
+  }
   </style>
 </head>
 <body>
-
   <?php include 'menu.php'; ?>
 
   <div class="content">
@@ -724,7 +740,9 @@ body {
                 <th><i class="bi bi-shield-check"></i> SOAT</th>
                 <th><i class="bi bi-gear"></i> TecnoMecánica</th>
                 <th><i class="bi bi-person-badge"></i> Licencia</th>
-                <th><i class="bi bi-file-earmark-text"></i>Propietario</th>
+                <th><i class="bi bi-envelope"></i> Email</th>
+                <th><i class="bi bi-telephone"></i> Teléfono</th>
+                <th><i class="bi bi-file-earmark-text"></i> Propietario</th>
               </tr>
             </thead>
             <tbody>
@@ -734,44 +752,70 @@ body {
                     <span class="placa-badge"><?= htmlspecialchars($doc['placa']) ?></span>
                   </td>
                   <td>
-                    <?php 
-                    $soat_status = getDocumentStatus($doc['soat_vence']);
-                    $soat_fecha = new DateTime($doc['soat_vence']);
-                    ?>
-                   <center> <span class="status-<?= $soat_status ?> fecha-tooltip" 
-                          data-tooltip="Vence: <?= $soat_fecha->format('d/m/Y') ?>">
-                      <?php if ($soat_status === 'vigente'): ?>
-                        Vigente
-                      <?php elseif ($soat_status === 'proximo'): ?>
-                        Por vencer
-                      <?php else: ?>
-                        Vencido
-                      <?php endif; ?>
-                    </span></center>
+                    <div class="doc-info">
+                      <?php 
+                      $soat_exp = 'No disponible';
+                      $soat_venc = 'No disponible';
+                      if ($doc['soat']['expedicion']) {
+                        try { $soat_exp = (new DateTime($doc['soat']['expedicion']))->format('d/m/Y'); } catch (Exception $e) {}
+                      }
+                      if ($doc['soat']['vencimiento']) {
+                        try { $soat_venc = (new DateTime($doc['soat']['vencimiento']))->format('d/m/Y'); } catch (Exception $e) {}
+                      }
+                      ?>
+                      <span class="doc-date">Exp: <?= $soat_exp ?></span>
+                      <span class="doc-date">Venc: <?= $soat_venc ?></span>
+                      <span class="doc-status <?= $doc['soat']['estado'] ?>">
+                        <?php echo ucfirst($doc['soat']['estado'] === 'no-disponible' ? 'Sin Registrar' : $doc['soat']['estado']); ?>
+                      </span>
+                    </div>
                   </td>
                   <td>
-                    <?php 
-                    $tecno_status = getDocumentStatus($doc['tecnomecanica_vence']);
-                    $tecno_fecha = new DateTime($doc['tecnomecanica_vence']);
-                    ?>
-                    <span class="status-<?= $tecno_status ?> fecha-tooltip" 
-                          data-tooltip="Vence: <?= $tecno_fecha->format('d/m/Y') ?>">
-                      <?php if ($tecno_status === 'vigente'): ?>
-                        Vigente
-                      <?php elseif ($tecno_status === 'proximo'): ?>
-                        Por vencer
-                      <?php else: ?>
-                        Vencido
-                      <?php endif; ?>
-                    </span>
+                    <div class="doc-info">
+                      <?php 
+                      $tecno_exp = 'No disponible';
+                      $tecno_venc = 'No disponible';
+                      if ($doc['tecnomecanica']['expedicion']) {
+                        try { $tecno_exp = (new DateTime($doc['tecnomecanica']['expedicion']))->format('d/m/Y'); } catch (Exception $e) {}
+                      }
+                      if ($doc['tecnomecanica']['vencimiento']) {
+                        try { $tecno_venc = (new DateTime($doc['tecnomecanica']['vencimiento']))->format('d/m/Y'); } catch (Exception $e) {}
+                      }
+                      ?>
+                      <span class="doc-date">Exp: <?= $tecno_exp ?></span>
+                      <span class="doc-date">Venc: <?= $tecno_venc ?></span>
+                      <span class="doc-status <?= $doc['tecnomecanica']['estado'] ?>">
+                        <?php echo ucfirst($doc['tecnomecanica']['estado'] === 'no-disponible' ? 'Sin Registrar' : $doc['tecnomecanica']['estado']); ?>
+                      </span>
+                    </div>
                   </td>
                   <td>
-                    <span class="status-<?= $doc['licencia_estado'] ?>">
-                      <?= ucfirst($doc['licencia_estado']) ?>
-                    </span>
+                    <div class="doc-info">
+                      <?php 
+                      $lic_exp = 'No disponible';
+                      $lic_venc = 'No disponible';
+                      if ($doc['licencia']['expedicion']) {
+                        try { $lic_exp = (new DateTime($doc['licencia']['expedicion']))->format('d/m/Y'); } catch (Exception $e) {}
+                      }
+                      if ($doc['licencia']['vencimiento']) {
+                        try { $lic_venc = (new DateTime($doc['licencia']['vencimiento']))->format('d/m/Y'); } catch (Exception $e) {}
+                      }
+                      ?>
+                      <span class="doc-date">Exp: <?= $lic_exp ?></span>
+                      <span class="doc-date">Venc: <?= $lic_venc ?></span>
+                      <span class="doc-status <?= $doc['licencia']['estado'] ?>">
+                        <?php echo ucfirst($doc['licencia']['estado'] === 'no-disponible' ? 'Sin Registrar' : $doc['licencia']['estado']); ?>
+                      </span>
+                    </div>
                   </td>
-                     <td>
-                    <?= htmlspecialchars($doc['propietario']) ?>
+                  <td id="email-<?= htmlspecialchars($doc['placa']) ?>" class="user-info">
+                    <?= htmlspecialchars($doc['email'] ?? 'No disponible') ?>
+                  </td>
+                  <td id="telefono-<?= htmlspecialchars($doc['placa']) ?>" class="user-info">
+                    <?= htmlspecialchars($doc['telefono'] ?? 'No disponible') ?>
+                  </td>
+                  <td id="propietario-<?= htmlspecialchars($doc['placa']) ?>" class="user-info">
+                    <?= htmlspecialchars($doc['propietario'] ?? 'Desconocido') ?>
                   </td>
                 </tr>
               <?php endforeach; ?>
@@ -786,21 +830,21 @@ body {
       </div>
     </div>
   </div>
-<script>
-  
+
+  <script>
     // Función de filtrado mejorada
     function filtrarTabla() {
       const input = document.getElementById('buscar').value.toLowerCase();
       const rows = document.querySelectorAll("#tablaDocumentos tbody tr");
       let visibleRows = 0;
-      
+
       rows.forEach(row => {
         const text = row.innerText.toLowerCase();
         const isVisible = text.includes(input);
         row.style.display = isVisible ? '' : 'none';
         if (isVisible) visibleRows++;
       });
-      
+
       // Reconfigurar paginación después del filtrado
       configurarPaginacion();
     }
@@ -809,7 +853,7 @@ body {
     const filasPorPagina = 5;
     function configurarPaginacion() {
       const filas = Array.from(document.querySelectorAll('#tablaDocumentos tbody tr'))
-                         .filter(row => row.style.display !== 'none');
+                        .filter(row => row.style.display !== 'none');
       const totalPaginas = Math.ceil(filas.length / filasPorPagina);
       const paginacion = document.getElementById('paginacion');
 
@@ -818,14 +862,14 @@ body {
         document.querySelectorAll('#tablaDocumentos tbody tr').forEach(row => {
           row.style.display = 'none';
         });
-        
+
         // Mostrar solo las filas de la página actual
         const inicio = (pagina - 1) * filasPorPagina;
         const fin = inicio + filasPorPagina;
         filas.slice(inicio, fin).forEach(row => {
           row.style.display = '';
         });
-        
+
         // Actualizar botones de paginación
         document.querySelectorAll('#paginacion .page-item').forEach(btn => {
           btn.classList.remove('active');
@@ -851,8 +895,7 @@ body {
       }
     }
 
-  
-
+    // Funciones para acciones de documentos
     function editarDocumento(placa) {
       // Implementar edición de documento
       window.open(`editar_documento.php?placa=${placa}`, '', 'width=800, height=600, toolbar=NO');
@@ -873,11 +916,21 @@ body {
     // Inicializar cuando el DOM esté listo
     window.addEventListener('DOMContentLoaded', () => {
       configurarPaginacion();
-      
+
       // Agregar animación a las filas
       const rows = document.querySelectorAll('#tablaDocumentos tbody tr');
       rows.forEach((row, index) => {
         row.style.animationDelay = `${index * 0.1}s`;
+      });
+
+      // Agregar soporte para tooltips de accesibilidad
+      document.querySelectorAll('.fecha-tooltip').forEach(tooltip => {
+        tooltip.addEventListener('mouseenter', () => {
+          tooltip.setAttribute('aria-label', tooltip.getAttribute('data-tooltip'));
+        });
+        tooltip.addEventListener('mouseleave', () => {
+          tooltip.removeAttribute('aria-label');
+        });
       });
     });
   </script>

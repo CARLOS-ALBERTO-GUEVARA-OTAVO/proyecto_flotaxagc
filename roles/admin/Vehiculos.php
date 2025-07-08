@@ -176,8 +176,7 @@ function getEstadoClass($estado) {
                     
                     if (count($vehiculos) > 0):
                         foreach ($vehiculos as $resu):
-                            error_log("Fetched vehicle: placa={$resu['placa']}, documento={$resu['Documento']}, id_marca={$resu['id_marca']}, modelo={$resu['modelo']}, id_estado={$resu['id_estado']}, kilometraje={$resu['kilometraje_actual']}");
-$image_path = '../../usuario/' . htmlspecialchars($resu['foto_vehiculo']);
+                            $image_path = '../../roles/usuario/vehiculos/listar/guardar_foto_vehiculo/' . htmlspecialchars($resu['foto_vehiculo']);
                     ?>
                     <tr>    
                         <td><span class="numero-fila"><?php echo $count++; ?></span></td>
@@ -193,22 +192,21 @@ $image_path = '../../usuario/' . htmlspecialchars($resu['foto_vehiculo']);
                         </td>
                         <td><span class="kilometraje-cell"><?php echo number_format($resu['kilometraje_actual']); ?></span></td>
                         <td><span class="fecha-cell"><?php echo date('d/m/Y', strtotime($resu['fecha_registro'])); ?></span></td>
-                                      <td>
-                                        <?php
-                                        $nombreImagen = htmlspecialchars($resu['foto_vehiculo']);
-                                        $rutaImagen = "../../roles/usuario/vehiculos/listar/guardar_foto_vehiculo/" . $nombreImagen;
-                                        ?>
-                                        <img src="<?php echo $rutaImagen; ?>"
-                                             alt="Vehículo <?php echo htmlspecialchars($resu['placa']); ?>" 
-                                             class="vehicle-image">
-                                        </td>
-
+                        <td>
+                            <?php
+                            $nombreImagen = htmlspecialchars($resu['foto_vehiculo']);
+                            $rutaImagen = "../../roles/usuario/vehiculos/listar/guardar_foto_vehiculo/" . $nombreImagen;
+                            ?>
+                            <img src="<?php echo $rutaImagen; ?>"
+                                 alt="Vehículo <?php echo htmlspecialchars($resu['placa']); ?>" 
+                                 class="vehicle-image">
+                        </td>
                         <td>
                             <div class="action-buttons">
-                                <a class="action-icon edit" data-id="<?php echo htmlspecialchars($resu['placa']); ?>" title="Editar vehículo">
+                                <a class="action-icon edit" data-id="<?php echo htmlspecialchars($resu['placa']); ?>" title="Editar vehículo" data-bs-toggle="modal" data-bs-target="#modalEditarVehiculo">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
-                                <a class="action-icon delete" data-id="<?php echo htmlspecialchars($resu['placa']); ?>" title="Eliminar vehículo">
+                                <a class="action-icon delete" data-id="<?php echo htmlspecialchars($resu['placa']); ?>" title="Eliminar vehículo" data-bs-toggle="modal" data-bs-target="#modalEliminarVehiculo">
                                     <i class="bi bi-trash"></i>
                                 </a>
                             </div>
@@ -240,7 +238,7 @@ $image_path = '../../usuario/' . htmlspecialchars($resu['foto_vehiculo']);
 
     <!-- Botón agregar -->
     <div class="boton-agregar">
-        <button type="button" class="boton" id="btnAgregarVehiculo">
+        <button type="button" class="boton" id="btnAgregarVehiculo" data-bs-toggle="modal" data-bs-target="#modalAgregarVehiculo">
             <i class="bi bi-plus-circle"></i>
             <i class="bi bi-truck"></i>
             Agregar Vehículo
@@ -249,6 +247,7 @@ $image_path = '../../usuario/' . htmlspecialchars($resu['foto_vehiculo']);
 </div> <!-- cierre de .content -->
 
 <?php include 'modals_vehiculos/vehiculo_modals.php'; ?>
+<?php include 'modals_vehiculos/agregar_vehiculo.php'; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="modals_vehiculos/vehiculos-scripts.js"></script>
@@ -379,6 +378,12 @@ $image_path = '../../usuario/' . htmlspecialchars($resu['foto_vehiculo']);
             selectAno.appendChild(option);
         });
     }
+
+    // Activar modales
+    document.getElementById('btnAgregarVehiculo').addEventListener('click', () => {
+        const modal = new bootstrap.Modal(document.getElementById('modalAgregarVehiculo'));
+        modal.show();
+    });
 </script>
 </body>
 </html>
