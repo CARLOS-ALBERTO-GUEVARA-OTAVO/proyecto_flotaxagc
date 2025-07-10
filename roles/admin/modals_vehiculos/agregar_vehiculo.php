@@ -1,116 +1,85 @@
 <?php
-// Iniciar sesión si no está activa
-if (session_status() !== PHP_SESSION_ACTIVE) {
+if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once('../../conecct/conex.php'); // Ajusta a 'connect' si es correcto
-require_once('../../includes/validarsession.php');
 
-ini_set('display_errors', 0);
-ini_set('log_errors', 1);
-ini_set('error_log', 'php_errors.log');
+define('BASE_PATH', $_SERVER['DOCUMENT_ROOT'] . '/proyecto');
+require_once(BASE_PATH . '/conecct/conex.php');
+require_once(BASE_PATH . '/includes/validarsession.php');
 
-// Manejar solo solicitudes POST como API
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    header('Content-Type: application/json');
     $db = new Database();
     $con = $db->conectar();
-
-    $response = ['success' => false, 'error' => ''];
 
     if (!$con) {
-        error_log("Failed to connect to database in agregar_vehiculo.php");
-        $response['error'] = 'No se pudo conectar a la base de datos';
-        echo json_encode($response);
+        $_SESSION['mensaje'] = ['tipo' => 'danger', 'texto' => 'No se pudo conectar a la base de datos'];
+        header('Location: ../vehiculos.php');
         exit;
     }
 
-    $documento = $_SESSION['documento'] ?? null;
-    if (!$documento) {
-        $response['error'] = 'Sesión no válida. Por favor, inicia sesión.';
-        echo json_encode($response);
+    $placa = strtoupper(trim($_POST['placa'] ?? ''));
+    $tipo_vehiculo = $_POST['tipo_vehiculo'] ?? null;
+    $documento_usuario = $_POST['documento_usuario'] ?? null;
+    $id_marca = $_POST['marca'] ?? null;
+    $modelo = $_POST['modelo'] ?? null;
+    $kilometraje_actual = $_POST['kilometraje_actual'] ?? null;
+    $id_estado = $_POST['estado'] ?? null;
+    $fecha_registro = date('Y-m-d');
+    $foto_vehiculo = $_FILES['foto_vehiculo']['name'] ?? 'sin_foto_carro.png';
+
+    if (!$placa || !$tipo_vehiculo || !$documento_usuario || !$id_marca || !$modelo || !$kilometraje_actual || !$id_estado) {
+        $_SESSION['mensaje'] = ['tipo' => 'warning', 'texto' => 'Todos los campos son obligatorios.'];
+        header('Location: ../vehiculos.php');
         exit;
     }
 
-    try {
-        // Depuración: Verificar datos recibidos
-        error_log("Datos recibidos: " . print_r($_POST, true) . print_r($_FILES, true));
+    $check_placa = $con->prepare("SELECT placa FROM vehiculos WHERE placa = :placa");
+    $check_placa->bindParam(':placa', $placa, PDO::PARAM_STR);
+    $check_placa->execute();
 
-        $placa = strtoupper(trim($_POST['placa'] ?? ''));
-        $tipo_vehiculo = $_POST['tipo_vehiculo'] ?? null;
-        $documento_usuario = $_POST['documento_usuario'] ?? null;
-        $id_marca = $_POST['marca'] ?? null;
-        $modelo = $_POST['modelo'] ?? null;
-        $kilometraje_actual = $_POST['kilometraje_actual'] ?? null;
-        $id_estado = $_POST['estado'] ?? null;
-        $fecha_registro = date('Y-m-d');
-        $foto_vehiculo = $_FILES['foto_vehiculo']['name'] ?? 'sin_foto_carro.png';
-
-        // Validaciones
-        if (!$placa || !$tipo_vehiculo || !$documento_usuario || !$id_marca || !$modelo || !$kilometraje_actual || !$id_estado) {
-            $response['error'] = 'Todos los campos son obligatorios.';
-            echo json_encode($response);
-            exit;
-        }
-
-        $check_placa = $con->prepare("SELECT placa FROM vehiculos WHERE placa = :placa");
-        $check_placa->bindParam(':placa', $placa, PDO::PARAM_STR);
-        $check_placa->execute();
-        if ($check_placa->rowCount() > 0) {
-            $response['error'] = 'La placa ya está registrada.';
-            echo json_encode($response);
-            exit;
-        }
-
-        if ($_FILES['foto_vehiculo']['name']) {
-            $target_dir = "../../../roles/usuario/vehiculos/listar/guardar_foto_vehiculo/";
-            if (!is_dir($target_dir)) {
-                mkdir($target_dir, 0755, true);
-            }
-            $target_file = $target_dir . basename($_FILES['foto_vehiculo']['name']);
-            if (!move_uploaded_file($_FILES['foto_vehiculo']['tmp_name'], $target_file)) {
-                $response['error'] = 'Error al subir la foto del vehículo.';
-                echo json_encode($response);
-                exit;
-            }
-        }
-
-        $insert = $con->prepare("INSERT INTO vehiculos (placa, tipo_vehiculo, Documento, id_marca, modelo, kilometraje_actual, id_estado, fecha_registro, foto_vehiculo) 
-                                VALUES (:placa, :tipo_vehiculo, :documento, :id_marca, :modelo, :kilometraje_actual, :id_estado, :fecha_registro, :foto_vehiculo)");
-        $insert->bindParam(':placa', $placa, PDO::PARAM_STR);
-        $insert->bindParam(':tipo_vehiculo', $tipo_vehiculo, PDO::PARAM_INT);
-        $insert->bindParam(':documento', $documento_usuario, PDO::PARAM_STR);
-        $insert->bindParam(':id_marca', $id_marca, PDO::PARAM_INT);
-        $insert->bindParam(':modelo', $modelo, PDO::PARAM_STR);
-        $insert->bindParam(':kilometraje_actual', $kilometraje_actual, PDO::PARAM_INT);
-        $insert->bindParam(':id_estado', $id_estado, PDO::PARAM_INT);
-        $insert->bindParam(':fecha_registro', $fecha_registro, PDO::PARAM_STR);
-        $insert->bindParam(':foto_vehiculo', $foto_vehiculo, PDO::PARAM_STR);
-
-        if ($insert->execute()) {
-            $response['success'] = true;
-            $response['message'] = 'Vehículo agregado exitosamente.';
-        } else {
-            $response['error'] = 'Error al registrar el vehículo: ' . implode(', ', $insert->errorInfo());
-        }
-    } catch (PDOException $e) {
-        error_log("Database error in agregar_vehiculo.php: " . $e->getMessage());
-        $response['error'] = 'Error en la base de datos: ' . $e->getMessage();
-    } catch (Exception $e) {
-        error_log("General error in agregar_vehiculo.php: " . $e->getMessage());
-        $response['error'] = 'Error inesperado: ' . $e->getMessage();
+    if ($check_placa->rowCount() > 0) {
+        $_SESSION['mensaje'] = ['tipo' => 'danger', 'texto' => 'La placa ya está registrada.'];
+        header('Location: ../vehiculos.php');
+        exit;
     }
 
-    echo json_encode($response);
+    if ($_FILES['foto_vehiculo']['name']) {
+        $target_dir = "../../../roles/usuario/vehiculos/listar/guardar_foto_vehiculo/";
+        if (!is_dir($target_dir)) {
+            mkdir($target_dir, 0755, true);
+        }
+        $target_file = $target_dir . basename($_FILES['foto_vehiculo']['name']);
+        if (!move_uploaded_file($_FILES['foto_vehiculo']['tmp_name'], $target_file)) {
+            $_SESSION['mensaje'] = ['tipo' => 'danger', 'texto' => 'Error al subir la foto del vehículo.'];
+            header('Location: ../vehiculos.php');
+            exit;
+        }
+    }
+
+    $insert = $con->prepare("INSERT INTO vehiculos (placa, tipo_vehiculo, Documento, id_marca, modelo, kilometraje_actual, id_estado, fecha_registro, foto_vehiculo) 
+                            VALUES (:placa, :tipo_vehiculo, :documento, :id_marca, :modelo, :kilometraje_actual, :id_estado, :fecha_registro, :foto_vehiculo)");
+    $insert->bindParam(':placa', $placa);
+    $insert->bindParam(':tipo_vehiculo', $tipo_vehiculo);
+    $insert->bindParam(':documento', $documento_usuario);
+    $insert->bindParam(':id_marca', $id_marca);
+    $insert->bindParam(':modelo', $modelo);
+    $insert->bindParam(':kilometraje_actual', $kilometraje_actual);
+    $insert->bindParam(':id_estado', $id_estado);
+    $insert->bindParam(':fecha_registro', $fecha_registro);
+    $insert->bindParam(':foto_vehiculo', $foto_vehiculo);
+
+    if ($insert->execute()) {
+        $_SESSION['mensaje'] = ['tipo' => 'success', 'texto' => 'Vehículo agregado exitosamente.'];
+    } else {
+        $_SESSION['mensaje'] = ['tipo' => 'danger', 'texto' => 'Error al registrar el vehículo.'];
+    }
+
+    header('Location: ../vehiculos.php');
     exit;
 }
-
-// Renderizar HTML solo si es una solicitud GET (carga inicial)
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $db = new Database();
-    $con = $db->conectar();
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -130,7 +99,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="agregarVehiculoForm" method="POST" enctype="multipart/form-data" action="">
+                <form id="formAgregarVehiculo" method="POST" enctype="multipart/form-data" action="modals_vehiculos/agregar_vehiculo.php">
+
                     <div class="mb-3">
                         <label for="placa" class="form-label">Placa</label>
                         <input type="text" class="form-control" id="placa" name="placa" required maxlength="10">
@@ -218,6 +188,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-<?php
-}
-?>

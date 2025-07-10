@@ -1,5 +1,13 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+
 require_once('../../conecct/conex.php');
 include '../../includes/validarsession.php';
 $db = new Database();
@@ -70,6 +78,14 @@ function getEstadoClass($estado) {
 </head>
 <body>
 <?php include 'menu.php'; ?>
+<?php if (isset($_SESSION['mensaje'])): ?>
+    <div class="alert alert-<?php echo $_SESSION['mensaje']['tipo']; ?> alert-dismissible fade show mx-4 mt-3" role="alert">
+        <?php echo $_SESSION['mensaje']['texto']; ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+    <?php unset($_SESSION['mensaje']); ?>
+<?php endif; ?>
+
 
 <div class="content">
     <!-- Header de la página -->
