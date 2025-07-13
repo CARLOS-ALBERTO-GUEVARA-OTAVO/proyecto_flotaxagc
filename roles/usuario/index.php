@@ -40,6 +40,29 @@ if (!$nombre_completo || !$foto_perfil) {
     <link rel="stylesheet" href="css/styles.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- FullCalendar CSS y JS -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+    <style>
+  .evento-personalizado {
+  background-color: #198754 !important; /* Verde Bootstrap */
+  color: white !important;
+  border-radius: 6px;
+  padding: 2px 4px;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 1.1;
+  height: auto;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+</style>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+
 </head>
 <body>
 
@@ -112,6 +135,11 @@ if (!$nombre_completo || !$foto_perfil) {
         </form>
     </div>
 </div>
+<div class="calendario-usuario">
+    <h2>Mi calendario</h2>
+    <div id="calendario"></div>
+</div>
+
 
 <!-- Botón de cierre de sesión -->
 <div class="sidebar">
@@ -124,6 +152,149 @@ if (!$nombre_completo || !$foto_perfil) {
     // Incluye el modal de cierre de sesión automático
     include('../../includes/auto_logout_modal.php');
 ?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var calendarEl = document.getElementById('calendario');
+  var calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'dayGridMonth',
+    locale: 'es',
+    events: 'calendario/cargar_eventos.php', // archivo PHP que devolverá los eventos en formato JSON
+   eventClick: function(info) {
+  const titulo = info.event.title;
+  const descripcion = info.event.extendedProps.descripcion;
+  const fecha = info.event.startStr;
+
+  const detalles = descripcion
+    .split('.')
+    .map(texto => texto.trim())
+    .filter(texto => texto !== '')
+    .map(texto => `<li><i class="bi bi-dot"></i> ${texto}</li>`)
+    .join('');
+
+  document.querySelector('#eventoTitulo span').textContent = titulo;
+  document.getElementById('eventoDescripcion').innerHTML = detalles;
+  document.querySelector('#eventoFecha span').textContent = fecha;
+
+  const myModal = new bootstrap.Modal(document.getElementById('eventoModal'));
+  myModal.show();
+}
+
+
+
+
+
+  });
+  calendar.render();
+});
+
+</script>
+
+<div class="modal fade" id="eventoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow rounded-4 border-0" style="max-width: 500px; margin: auto;">
+      <div class="modal-header bg-success text-white rounded-top-4">
+        <h5 class="modal-title w-100 text-center m-0">
+          <i class="bi bi-calendar-event-fill me-2"></i>Detalles del Evento
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body px-4 py-3 text-dark">
+        <h6 id="eventoTitulo" class="fw-bold text-success text-center mb-3">
+          <i class="bi bi-wrench-adjustable-circle me-1"></i><span></span>
+        </h6>
+        <ul id="eventoDescripcion" class="list-group list-group-flush mb-3">
+          <!-- Lista de descripción -->
+        </ul>
+        <p id="eventoFecha" class="text-muted text-center mb-0">
+          <i class="bi bi-clock-history me-2"></i><span></span>
+        </p>
+      </div>
+      <div class="modal-footer border-0 justify-content-center pb-4">
+        <button type="button" class="btn btn-outline-success rounded-pill px-4" data-bs-dismiss="modal">
+          <i class="bi bi-x-circle me-1"></i> Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<style>
+<style>
+/* Estilo para el modal centrado y elegante */
+.modal-content {
+  border-radius: 1rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  border-bottom: none;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.modal-header .modal-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.modal-body h6 {
+  font-size: 1.1rem;
+  color: #198754;
+}
+
+#eventoDescripcion li {
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  color: #495057;
+  list-style: none;
+  padding-left: 1rem;
+  position: relative;
+}
+
+#eventoDescripcion li::before {
+  content: "•";
+  color: #198754;
+  position: absolute;
+  left: 0;
+  font-weight: bold;
+}
+
+.modal-footer {
+  border-top: none;
+}
+
+.modal-footer .btn {
+  padding: 0.5rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+</style>
+<style>
+.modal.fade .modal-dialog {
+  transform: translateY(10%) !important;
+  transition: transform 0.3s ease-out;
+}
+</style>
+<style>
+.calendario-usuario {
+  max-width: 700px; /* Puedes cambiar a 800px, 700px, etc. */
+  margin: 0 auto;   /* Centra horizontalmente */
+  padding: 20px;
+}
+
+#calendario {
+  max-width: 100%; /* Asegura que no desborde */
+  margin: 0 auto;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  border-radius: 10px;
+}
+</style>
+
+
+
 
 
 </body>

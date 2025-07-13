@@ -24,7 +24,7 @@
 }
 
 .modal-title i {
-  color: #0d6efd;
+  color: #e74c3c !important; /* Rojo forzado */
 }
 
 .modal-body {
@@ -53,8 +53,8 @@
 
 .form-control:focus,
 .form-select:focus {
-  border-color: #86b7fe;
-  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  border-color: #e74c3c !important; /* Rojo forzado */
+  box-shadow: 0 0 0 0.25rem rgba(231, 76, 60, 0.25) !important;
 }
 
 .form-text {
@@ -94,13 +94,13 @@
 }
 
 .btn-primary {
-  background-color: #0d6efd;
-  border-color: #0d6efd;
+  background-color: #e74c3c !important; /* Rojo forzado */
+  border-color: #e74c3c !important;
 }
 
 .btn-primary:hover {
-  background-color: #0b5ed7;
-  border-color: #0a58ca;
+  background-color: #c0392b !important; /* Tono más oscuro rojo */
+  border-color: #a93226 !important;
 }
 
 .btn-secondary {

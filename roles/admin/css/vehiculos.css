@@ -1,14 +1,14 @@
 /* Estilos para la Gestión de Vehículos */
 :root {
-  --primary-color: #667eea;
-  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --primary-color: #e74c3c !important; /* Rojo forzado como primario */
+  --primary-gradient: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important; /* Gradiente rojo */
   --secondary-color: #2c3e50;
   --success-color: #27ae60;
   --warning-color: #f39c12;
-  --danger-color: #e74c3c;
+  --danger-color: #e74c3c !important; /* Rojo forzado */
   --info-color: #3498db;
   --text-color: #2d3748;
-  --text-light: #718096;
+  --text-light: #718096; /* Gris por defecto */
   --bg-color: #f8fafc;
   --card-bg: #ffffff;
   --border-color: #e2e8f0;
@@ -27,6 +27,28 @@ body {
   background-color: var(--bg-color);
   color: var(--text-color);
   overflow-x: hidden;
+}
+
+/* Sobrescribir estilos de enlaces y navegación */
+a,
+a:-webkit-any-link,
+.nav-link {
+  color: #e74c3c !important; /* Rojo forzado en todos los enlaces y nav-links */
+  text-decoration: none !important;
+}
+
+a:hover,
+a:-webkit-any-link:hover,
+.nav-link:hover {
+  color: #c0392b !important; /* Rojo más oscuro al hover */
+  text-decoration: none !important;
+  background-color: rgba(231, 76, 60, 0.1) !important;
+}
+
+.nav-link.active {
+  background: linear-gradient(135deg, rgba(231, 47, 47, 0.1), rgba(231, 47, 47, 0.1)) !important;
+  color: #e74c3c !important; /* Rojo forzado en activo */
+  font-weight: 600;
 }
 
 /* Contenido principal */
@@ -62,7 +84,7 @@ body {
 }
 
 .page-title i {
-  color: var(--primary-color);
+  color: var(--text-light); /* Gris por defecto */
   font-size: 32px;
 }
 
@@ -102,8 +124,8 @@ body {
 
 .buscador .form-control:focus {
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--danger-color) !important; /* Rojo forzado */
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1) !important;
 }
 
 .buscador::before {
@@ -125,9 +147,9 @@ body {
 }
 
 .boton-agregar .boton {
-  background: var(--primary-gradient);
+  background: var(--danger-color) !important; /* Rojo forzado */
   border: none;
-  color: white;
+  color: white !important;
   padding: 15px 30px;
   border-radius: 10px;
   font-weight: 600;
@@ -143,7 +165,7 @@ body {
 .boton-agregar .boton:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-lg);
-  color: white;
+  color: white !important;
   text-decoration: none;
 }
 
@@ -175,8 +197,8 @@ body {
 }
 
 .table thead {
-  background: var(--primary-gradient);
-  color: white;
+  background: var(--danger-color) !important; /* Rojo forzado */
+  color: white !important;
 }
 
 .table thead th {
@@ -205,9 +227,9 @@ body {
 }
 
 .table tbody tr:hover {
-  background-color: rgba(102, 126, 234, 0.05);
+  background-color: rgba(231, 76, 60, 0.05) !important;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.1) !important;
 }
 
 .table tbody tr:last-child {
@@ -225,7 +247,7 @@ body {
 .placa-cell {
   font-weight: 500;
   color: black;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.05));
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.1), rgba(118, 75, 162, 0.05));
   border-radius: 6px;
   padding: 6px 12px;
   display: inline-block;
@@ -248,7 +270,7 @@ body {
 }
 
 .modelo-cell {
-  background: rgba(52, 152, 219, 0.1);
+  background: rgba(231, 76, 60, 0.1) !important;
   color: black;
   padding: 4px 8px;
   border-radius: 4px;
@@ -292,7 +314,7 @@ body {
 
 .fecha-cell {
   color: black;
-    font-weight: 500;
+  font-weight: 500;
   font-size: 13px;
 }
 
@@ -309,8 +331,8 @@ body {
 
 .vehicle-image:hover {
   transform: scale(1.1);
-  border-color: var(--primary-color);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  border-color: var(--danger-color) !important;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3) !important;
 }
 
 /* Acciones */
@@ -348,13 +370,13 @@ body {
 }
 
 .action-icon.delete {
-  color: var(--danger-color);
+  color: #e74c3c;
   background-color: rgba(231, 76, 60, 0.1);
   border-color: rgba(231, 76, 60, 0.2);
 }
 
 .action-icon.delete:hover {
-  background-color: var(--danger-color);
+  background-color: #e74c3c;
   color: white;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
@@ -387,8 +409,8 @@ body {
   width: 40px;
   height: 40px;
   background-color: var(--card-bg);
-  color: var(--text-color);
-  text-decoration: none;
+  color: #e74c3c !important; /* Rojo forzado */
+  text-decoration: none !important;
   border: 1px solid var(--border-color);
   font-weight: 600;
   font-size: 14px;
@@ -396,17 +418,17 @@ body {
 }
 
 .page-link:hover {
-  background-color: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
+  background-color: #e74c3c !important; /* Rojo forzado al hover */
+  color: white !important;
+  border-color: #e74c3c !important;
   transform: translateY(-1px);
-  text-decoration: none;
+  text-decoration: none !important;
 }
 
 .page-item.active .page-link {
-  background: var(--primary-gradient);
-  color: white;
-  border-color: var(--primary-color);
+  background: #e74c3c !important; /* Rojo forzado para activo */
+  color: white !important;
+  border-color: #e74c3c !important;
   box-shadow: var(--shadow);
 }
 
@@ -440,11 +462,11 @@ body {
   left: 0;
   width: 100%;
   height: 3px;
-  background: var(--primary-gradient);
+  background: var(--danger-color) !important; /* Rojo forzado */
 }
 
 .stat-card.vehicles::before {
-  background: linear-gradient(135deg, var(--primary-color), #764ba2);
+  background: linear-gradient(135deg, var(--danger-color), #c0392b) !important;
 }
 
 .stat-card.active::before {
@@ -456,7 +478,7 @@ body {
 }
 
 .stat-card.inactive::before {
-  background: linear-gradient(135deg, var(--danger-color), #c0392b);
+  background: linear-gradient(135deg, var(--danger-color), #c0392b) !important;
 }
 
 .stat-number {
@@ -479,7 +501,7 @@ body {
   right: 15px;
   font-size: 24px;
   opacity: 0.3;
-  color: var(--primary-color);
+  color: var(--danger-color) !important; /* Rojo forzado */
 }
 
 /* Estados sin datos */
@@ -682,7 +704,7 @@ body {
   left: 0;
   width: 100%;
   height: 3px;
-  background: var(--primary-gradient);
+  background: var(--danger-color) !important; /* Rojo forzado */
 }
 
 .filter-group {
@@ -724,15 +746,15 @@ body {
 
 .filter-select:focus {
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23667eea' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  border-color: var(--danger-color) !important; /* Rojo forzado al enfocar */
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1) !important;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e74c3c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
 }
 
 .filter-select:hover {
-  border-color: var(--primary-color);
+  border-color: var(--danger-color) !important; /* Rojo forzado al hover */
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.15) !important;
 }
 
 .filter-select option {
@@ -743,7 +765,7 @@ body {
 }
 
 .filter-select option:hover {
-  background-color: rgba(102, 126, 234, 0.1);
+  background-color: rgba(231, 76, 60, 0.1) !important; /* Rojo al hover */
 }
 
 /* Botón de limpiar filtros (opcional) */
@@ -765,9 +787,9 @@ body {
 }
 
 .filter-clear-btn:hover {
-  border-color: var(--danger-color);
-  color: var(--danger-color);
-  background-color: rgba(231, 76, 60, 0.05);
+  border-color: var(--danger-color) !important;
+  color: var(--danger-color) !important;
+  background-color: rgba(231, 76, 60, 0.05) !important;
   transform: translateY(-1px);
 }
 

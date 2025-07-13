@@ -9,32 +9,53 @@
 body {
     margin: 0;
     padding: 0;
-    background-color: #f8f9fa;
-    color: #333;
+    background: linear-gradient(135deg, #f5f5f5 0%, #f8f9fa 100%);
+    color: #1a1a1a;
+    overflow-x: hidden;
 }
 
 /* Alertas Section */
 .alertas {
-    background: linear-gradient(135deg, #ffffff, #f8f9fa);
+    background: linear-gradient(135deg, #ffffff, #f5f5f5);
     padding: 40px;
     margin: 30px;
     border-radius: 15px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     text-align: center;
+    position: relative;
+    overflow: hidden;
+    animation: fadeIn 1s ease-out;
+}
+
+.alertas::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(195, 158, 78, 0.1) 0%, transparent 70%);
+    animation: pulse 8s infinite;
+    z-index: 0;
 }
 
 .alertas h1 {
-    color: #d32f2f;
-    font-size: 32px;
+    color: #1a1a1a; /* Gris oscuro */
+    font-size: 36px;
     font-weight: 700;
-    margin-bottom: 30px;
+    margin-bottom: 40px;
     text-transform: uppercase;
+    position: relative;
+    z-index: 1;
+    text-align: center;
 }
 
 .alertas-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); /* Mínimo 160px por botón */
+    gap: 20px; /* Más espacio entre botones */
+    position: relative;
+    z-index: 1;
 }
 
 .alertas-grid .boton {
@@ -48,18 +69,42 @@ body {
     border-radius: 10px;
     font-size: 18px;
     font-weight: 600;
-    box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 6px 20px rgba(211, 47, 47, 0.3);
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+    min-width: 160px; /* Asegurar ancho mínimo */
+}
+
+.alertas-grid .boton::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: rgba(195, 158, 78, 0.2);
+    transition: width 0.4s ease;
+    z-index: 0;
 }
 
 .alertas-grid .boton i {
     margin-right: 10px;
     font-size: 24px;
+    transition: transform 0.3s ease;
 }
 
 .alertas-grid .boton:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(211, 47, 47, 0.5);
+    transform: translateY(-8px) scale(1.05);
+    box-shadow: 0 12px 30px rgba(211, 47, 47, 0.5);
+}
+
+.alertas-grid .boton:hover::before {
+    width: 100%;
+}
+
+.alertas-grid .boton:hover i {
+    transform: rotate(20deg);
 }
 
 /* Garage Section */
@@ -69,8 +114,9 @@ body {
     padding: 60px 40px;
     margin: 30px;
     border-radius: 15px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    animation: slideUp 1.2s ease-out;
 }
 
 .garage::before {
@@ -80,8 +126,13 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: linear-gradient(135deg, rgba(26, 26, 26, 0.6) 0%, rgba(26, 26, 26, 0.3) 100%);
     z-index: 1;
+    transition: opacity 0.5s ease;
+}
+
+.garage:hover::before {
+    opacity: 0.8;
 }
 
 .garage-content {
@@ -91,11 +142,13 @@ body {
 }
 
 .garage h2 {
-    color: #fff;
-    font-size: 28px;
+    color: #1a1a1a; /* Gris oscuro */
+    font-size: 32px;
     font-weight: 700;
-    margin-bottom: 30px;
+    margin-bottom: 40px;
     text-transform: uppercase;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    text-align: center;
 }
 
 .form-group {
@@ -103,44 +156,70 @@ body {
     justify-content: center;
     align-items: center;
     gap: 20px;
+    position: relative;
+    z-index: 2;
 }
 
 .form-group select {
     padding: 12px 20px;
-    border: none;
+    border: 2px solid #c39e4e;
     border-radius: 8px;
     font-size: 16px;
     min-width: 250px;
-    background-color: #fff;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    transition: box-shadow 0.3s ease;
+    background-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c39e4e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
 }
 
 .form-group select:focus {
     outline: none;
-    box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3);
+    border-color: #d32f2f;
+    box-shadow: 0 6px 20px rgba(211, 47, 47, 0.3);
+    transform: scale(1.02);
 }
 
 .form-group button {
     padding: 12px 30px;
     background: linear-gradient(135deg, #d32f2f, #b71c1c);
     color: #fff;
-    border: none;
+    border: 2px solid #c39e4e;
     border-radius: 8px;
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 6px 20px rgba(211, 47, 47, 0.3);
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.form-group button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(195, 158, 78, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
 }
 
 .form-group button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(211, 47, 47, 0.5);
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 10px 30px rgba(211, 47, 47, 0.5);
 }
 
-
-
+.form-group button:hover::after {
+    width: 300px;
+    height: 300px;
+}
 
 /* Responsive Design */
 @media (max-width: 768px) {
@@ -172,7 +251,7 @@ body {
     }
 
     .garage {
-        margin: 15pxbm;
+        margin: 15px;
         padding: 40px 20px;
     }
 
@@ -214,4 +293,21 @@ body {
         padding: 10px 20px;
         font-size: 14px;
     }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(50px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
 }
