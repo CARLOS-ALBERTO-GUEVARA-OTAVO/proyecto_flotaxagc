@@ -294,6 +294,26 @@ body {
         font-size: 14px;
     }
 }
+.mapa-talleres {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.mapa-talleres .boton {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #198754;
+  color: white;
+  border-radius: 10px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+.mapa-talleres .boton:hover {
+  background-color: #157347;
+}
+
 
 /* Animaciones */
 @keyframes fadeIn {

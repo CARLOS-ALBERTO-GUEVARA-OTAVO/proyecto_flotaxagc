@@ -111,6 +111,13 @@ if (!$nombre_completo || !$foto_perfil) {
         </a>
     </div>
 </div>
+<div class="mapa-talleres">
+    <h2>¿Dónde hay talleres cercanos?</h2>
+    <a href="mapa/mapa_talleres.php" class="boton">
+        <i class="bi bi-geo-alt-fill"></i> Ver mapa de talleres
+    </a>
+</div>
+
 
 <!-- Sección de selección y visualización de vehículos del usuario -->
 <div class="garage">

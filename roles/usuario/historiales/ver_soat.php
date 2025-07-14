@@ -193,7 +193,7 @@ if (!$nombre_completo || !$foto_perfil) {
     });
 </script>
 
-    <?php
+      <?php
       include('../../../includes/auto_logout_modal.php');
     ?>
 
