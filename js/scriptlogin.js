@@ -106,12 +106,12 @@ formulario.addEventListener('submit', (e) => {
                         document.getElementById('formulario_exito').style.opacity = 0;
 
                         // Redirección dependiendo del rol del usuario autenticado
-                        if (response.rol === "admin") {
-                            // Redirige al panel de administrador
+                          if (response.rol === "admin") {
                             location.href = "../roles/admin/index";
                         } else if (response.rol === "usuario") {
-                            // Redirige al panel de usuario
-                            location.href ="../roles/usuario/index";
+                            location.href = "../roles/usuario/index";
+                        } else if (response.rol === "superadmin") {
+                            location.href = "../superadmin/dashboard.php";
                         }
 
                     }, 2000);
