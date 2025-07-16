@@ -479,37 +479,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
     <!-- Modal para detalles de alerta -->
     <div class="modal fade" id="modalDetalles" tabindex="-1" aria-labelledby="modalDetallesLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title d-flex align-items-center" id="modalDetallesLabel">
-                        <i class="bi bi-bell me-2"></i>
-                        Detalles de la Alerta
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-0" id="detallesContenido">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title d-flex align-items-center" id="modalDetallesLabel">
+                    <i class="bi bi-bell me-2"></i>
+                    Detalles de la Alerta
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="content-wrapper" id="detallesContenido">
                     <!-- Contenido dinámico -->
-                    <div class="d-flex justify-content-center align-items-center p-5">
+                    <div class="loading-container d-flex justify-content-center align-items-center">
                         <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">Cargando...</span>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-x-circle me-1"></i>
-                        Cerrar
-                    </button>
-                    <button type="button" class="btn btn-success" id="btnResolverModal" onclick="resolverDesdeModal()">
-                        <i class="bi bi-check-circle me-1"></i>
-                        Resolver Alerta
-                    </button>
-                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-2"></i>
+                    Cerrar
+                </button>
+                <button type="button" class="btn btn-success" id="btnResolverModal" onclick="resolverDesdeModal()">
+                    <i class="bi bi-check-circle me-2"></i>
+                    Resolver Alerta
+                </button>
             </div>
         </div>
     </div>
-
+</div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let alertaActual = null;
@@ -662,52 +663,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                                 </div>
                             </div>
                             
-                            <!-- Información principal -->
-                            <div class="row mb-4">
-                                <div class="col-md-6">
-                                    <div class="card h-100">
-                                        <div class="card-header bg-primary text-white">
-                                            <h6 class="mb-0">
-                                                <i class="bi bi-info-circle me-2"></i>
-                                                Información General
-                                            </h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row g-3">
-                                                <div class="col-12">
-                                                    <label class="form-label fw-bold text-muted">Fecha y Hora</label>
-                                                    <div class="d-flex align-items-center">
-                                                        <i class="bi bi-calendar-event text-primary me-2"></i>
-                                                        <span>${fechaFormateada}</span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-12">
-                                                    <label class="form-label fw-bold text-muted">Tipo de Alerta</label>
-                                                    <div class="d-flex align-items-center">
-                                                        <i class="bi bi-tag text-primary me-2"></i>
-                                                        <span class="badge bg-info fs-6">${alerta.tipo}</span>
-                                                    </div>
-                                                </div>
-                                                ${alerta.vehiculo !== 'N/A' ? `
-                                                <div class="col-12">
-                                                    <label class="form-label fw-bold text-muted">Vehículo</label>
-                                                    <div class="d-flex align-items-center">
-                                                        <i class="bi bi-car-front text-primary me-2"></i>
-                                                        <span class="badge bg-secondary fs-6">${alerta.vehiculo}</span>
-                                                    </div>
-                                                </div>
-                                                ` : ''}
-                                                <div class="col-12">
-                                                    <label class="form-label fw-bold text-muted">Usuario Responsable</label>
-                                                    <div class="d-flex align-items-center">
-                                                        <i class="bi bi-person-circle text-primary me-2"></i>
-                                                        <span>${alerta.usuario}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                           <!-- Información principal -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-header bg-primary text-white d-flex align-items-center">
+                <i class="bi bi-info-circle me-2"></i>
+                <h6 class="mb-0">Información General</h6>
+            </div>
+            <div class="card-body">
+                <div class="info-group">
+                    <div class="info-item mb-3">
+                        <label class="form-label fw-bold text-muted">Fecha y Hora</label>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-calendar-event text-primary me-2"></i>
+                            <span class="text-content">${fechaFormateada}</span>
+                        </div>
+                    </div>
+                    <div class="info-item mb-3">
+                        <label class="form-label fw-bold text-muted">Tipo de Alerta</label>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-tag text-primary me-2"></i>
+                            <span class="badge bg-info text-white">${alerta.tipo}</span>
+                        </div>
+                    </div>
+                    ${alerta.vehiculo !== 'N/A' ? `
+                    <div class="info-item mb-3">
+                        <label class="form-label fw-bold text-muted">Vehículo</label>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-car-front text-primary me-2"></i>
+                            <span class="badge bg-secondary text-white">${alerta.vehiculo}</span>
+                        </div>
+                    </div>
+                    ` : ''}
+                    <div class="info-item mb-0">
+                        <label class="form-label fw-bold text-muted">Usuario Responsable</label>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-person-circle text-primary me-2"></i>
+                            <span class="text-content">${alerta.usuario}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
                                 
                                 <div class="col-md-6">
                                     <div class="card h-100">

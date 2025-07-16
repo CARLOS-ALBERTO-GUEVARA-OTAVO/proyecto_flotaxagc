@@ -69,7 +69,7 @@ $imagePath = htmlspecialchars($foto_perfil) . '?v=' . time();
         <a href="alertas.php" class="nav-link">
           <i class="bi bi-bell"></i>
           <span>Alertas</span>
-          <div class="nav-badge">3</div>
+          <div class="nav-badge"></div>
           <div class="nav-indicator"></div>
         </a>
         <a href="usuarios.php" class="nav-link">
