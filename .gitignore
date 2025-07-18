@@ -15,6 +15,6 @@ Thumbs.db
 .idea/
 
 # Ignorar base de datos local
-*.sql
+
 *.exe
 git-filter-repo/
